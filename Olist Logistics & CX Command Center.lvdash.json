@@ -1,0 +1,436 @@
+{
+  "datasets": [
+    {
+      "name": "00c1635d",
+      "displayName": "Dataset_KPIs",
+      "queryLines": [
+        "SELECT\r\n",
+        "  SUM(total_value) as Receita_Total,\r\n",
+        "  COUNT(DISTINCT order_id) as Total_Pedidos,\r\n",
+        "  ROUND((1 - AVG(is_late_delivery)), 4) as Taxa_Entrega_No_Prazo\r\n",
+        "FROM olist_portfolio.gold.fact_sales"
+      ]
+    },
+    {
+      "name": "9d9ce137",
+      "displayName": "Mapa_de_vendas",
+      "queryLines": [
+        "SELECT\r\n",
+        "  concat('BR-', c.customer_state) as Estado,\r\n",
+        "  COUNT(DISTINCT f.order_id) as Quantidade_Pedidos,\r\n",
+        "  SUM(f.total_value) as Valor_Vendas\r\n",
+        "FROM olist_portfolio.gold.fact_sales f\r\n",
+        "JOIN olist_portfolio.silver.customers c ON f.customer_id = c.customer_id\r\n",
+        "GROUP BY c.customer_state"
+      ]
+    },
+    {
+      "name": "86182011",
+      "displayName": "Analise_de_sentimentos",
+      "queryLines": [
+        "SELECT \r\n",
+        "  product_category_name as Categoria,\r\n",
+        "  COUNT(*) as Total_Reviews,\r\n",
+        "  SUM(CASE WHEN sentiment_label = 'negativo' THEN 1 ELSE 0 END) as Qtd_Negativos,\r\n",
+        "  ROUND((SUM(CASE WHEN sentiment_label = 'negativo' THEN 1 ELSE 0 END) / COUNT(*)), 2) as Taxa_Reprovacao\r\n",
+        "FROM olist_portfolio.gold.reviews_analytics\r\n",
+        "WHERE product_category_name IS NOT NULL\r\n",
+        "GROUP BY product_category_name\r\n",
+        "HAVING COUNT(*) > 50 \r\n",
+        "ORDER BY Taxa_Reprovacao DESC\r\n",
+        "LIMIT 15"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "eab436b2",
+      "displayName": "Dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "64eb495c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00c1635d",
+                  "fields": [
+                    {
+                      "name": "sum(Receita_Total)",
+                      "expression": "SUM(`Receita_Total`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Receita_Total)",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "BRL",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showDescription": false,
+                "showTitle": true,
+                "title": "Receita Total"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "9c076e25",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00c1635d",
+                  "fields": [
+                    {
+                      "name": "sum(Total_Pedidos)",
+                      "expression": "SUM(`Total_Pedidos`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(Total_Pedidos)",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showDescription": false,
+                "showTitle": true,
+                "title": "Total de Pedidos"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "00a03321",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "00c1635d",
+                  "fields": [
+                    {
+                      "name": "Taxa_Entrega_No_Prazo",
+                      "expression": "`Taxa_Entrega_No_Prazo`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "Taxa_Entrega_No_Prazo",
+                  "style": {
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": ">="
+                        },
+                        "color": "#00A972"
+                      }
+                    ]
+                  },
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showDescription": false,
+                "showTitle": true,
+                "title": "Entregas Dentro do Prazo"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 4,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "127aec20",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "9d9ce137",
+                  "fields": [
+                    {
+                      "name": "sum(Valor_Vendas)",
+                      "expression": "SUM(`Valor_Vendas`)"
+                    },
+                    {
+                      "name": "sum(Quantidade_Pedidos)",
+                      "expression": "SUM(`Quantidade_Pedidos`)"
+                    },
+                    {
+                      "name": "Estado",
+                      "expression": "`Estado`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "choropleth-map",
+              "encodings": {
+                "color": {
+                  "fieldName": "sum(Valor_Vendas)",
+                  "legend": {
+                    "title": "Valor Total de Vendas"
+                  },
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "BRL",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "sum(Quantidade_Pedidos)"
+                  }
+                ],
+                "region": {
+                  "regionType": "mapbox-v4-admin",
+                  "admin0": {
+                    "type": "value",
+                    "value": "Brasil",
+                    "geographicRole": "admin0-name"
+                  },
+                  "admin1": {
+                    "fieldName": "Estado",
+                    "type": "field",
+                    "geographicRole": "admin1-iso-3166-2"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Mapa de vendas"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 10
+          }
+        },
+        {
+          "widget": {
+            "name": "fb718f09",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "86182011",
+                  "fields": [
+                    {
+                      "name": "Taxa_Reprovacao",
+                      "expression": "`Taxa_Reprovacao`"
+                    },
+                    {
+                      "name": "Total_Reviews",
+                      "expression": "`Total_Reviews`"
+                    },
+                    {
+                      "name": "Categoria",
+                      "expression": "`Categoria`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "Total_Reviews",
+                  "axis": {
+                    "title": "Total de Comentários"
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "reverse": false,
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "Categoria",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "Taxa_Reprovacao",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    },
+                    "significantFigures": {
+                      "type": "exact",
+                      "figures": 3
+                    }
+                  },
+                  "legend": {
+                    "position": "right",
+                    "title": "Taxa de Reprovação"
+                  },
+                  "displayName": "Reprovação",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "reds"
+                    },
+                    "reverse": false,
+                    "domain": {
+                      "max": 0.42
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Análise de Sentimentos"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ],
+                "layout": "stack"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 6,
+            "height": 8
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}

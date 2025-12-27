@@ -1,0 +1,10 @@
+kaggle
+python-dotenv
+pandas
+matplotlib
+databricks-sdk
+streamlit
+transformers
+sentencepiece
+plotly
+google-generativeai
