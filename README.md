@@ -9,12 +9,12 @@ Este projeto implementa uma solução completa de **Data Lakehouse** no **Databr
 O projeto percorre todo o ciclo de vida dos dados, desde a ingestão até a ativação de insights com IA:
 ```mermaid
 graph LR
-    %% Definição de Estilos
-    classDef external fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    %% Definição de Estilos 
+    classDef external fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#000000;
     classDef bronze fill:#cd7f32,stroke:#333,stroke-width:1px,color:white;
-    classDef silver fill:#c0c0c0,stroke:#333,stroke-width:1px,color:black;
-    classDef gold fill:#ffd700,stroke:#333,stroke-width:1px,color:black;
-    classDef process fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    classDef silver fill:#c0c0c0,stroke:#333,stroke-width:1px,color:#000000;
+    classDef gold fill:#ffd700,stroke:#333,stroke-width:1px,color:#000000;
+    classDef process fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#000000;
 
     subgraph External_Source [Fontes & APIs]
         Kaggle[Kaggle Dataset]:::external
