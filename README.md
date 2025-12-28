@@ -7,7 +7,80 @@ Este projeto implementa uma solução completa de **Data Lakehouse** no **Databr
 ## Visão Geral do Projeto
 
 O projeto percorre todo o ciclo de vida dos dados, desde a ingestão até a ativação de insights com IA:
+```mermaid
+graph LR
+    %% Definição de Estilos
+    classDef external fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef bronze fill:#cd7f32,stroke:#333,stroke-width:1px,color:white;
+    classDef silver fill:#c0c0c0,stroke:#333,stroke-width:1px,color:black;
+    classDef gold fill:#ffd700,stroke:#333,stroke-width:1px,color:black;
+    classDef process fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
 
+    subgraph External_Source [Fontes & APIs]
+        Kaggle[Kaggle Dataset]:::external
+        Gemini[Google Gemini API]:::external
+        Discord[Discord Webhook]:::external
+    end
+
+    subgraph Databricks [Databricks Lakehouse]
+        direction LR
+        
+        subgraph Bronze_Layer [Camada Bronze]
+            Ingestao(01_ingestao):::process
+            Volume[Volume: Raw CSVs]:::bronze
+            BronzeTables[(Tabelas Bronze<br>Delta Lake)]:::bronze
+            Loader(02_carga_bronze):::process
+        end
+        
+        subgraph Silver_Layer [Camada Silver]
+            Cleaner(03_camada_silver):::process
+            SilverTables[(Tabelas Silver<br>Clean Data + NLP)]:::silver
+        end
+        
+        subgraph Gold_Layer [Camada Gold]
+            Modeler(04_camada_gold):::process
+            GoldFact[(Fato Vendas)]:::gold
+            GoldDim[(Dim Clientes RFM)]:::gold
+            GoldReviews[(Reviews Analytics)]:::gold
+            GoldAI[(AI Diagnostics)]:::gold
+        end
+
+        subgraph Activation [Ativação & Visualização]
+            GenAI_Agent(05_analise_ia_generativa):::process
+            Alert_System(06_automacao_alertas_ia):::process
+            Dashboard[Dashboard Lakeview]:::process
+        end
+    end
+
+    %% Fluxo de Ingestão
+    Kaggle -->|Download Zip| Ingestao
+    Ingestao --> Volume
+    Volume -->|Leitura CSV| Loader
+    Loader -->|Write Delta| BronzeTables
+
+    %% Fluxo Silver
+    BronzeTables -->|Leitura| Cleaner
+    Cleaner -->|Deduplicação & Timestamp| SilverTables
+    Cleaner -->|Análise de Sentimento| SilverTables
+
+    %% Fluxo Gold
+    SilverTables -->|Star Schema Join| Modeler
+    Modeler --> GoldFact
+    Modeler --> GoldDim
+    Modeler --> GoldReviews
+
+    %% Fluxo de IA e Ativação
+    GoldReviews -->|Filtra Críticos| GenAI_Agent
+    GenAI_Agent <-->|Prompt & Response| Gemini
+    GenAI_Agent -->|Salva Insights| GoldAI
+    
+    GoldAI -->|Lê Diagnósticos| Alert_System
+    Alert_System -->|Envia Alerta| Discord
+    
+    GoldFact --> Dashboard
+    GoldDim --> Dashboard
+    GoldReviews --> Dashboard
+```
 1. **Ingestão de Dados**: Coleta automatizada do dataset público da Olist (Kaggle).
 2. **Arquitetura Medalhão**:
 * **Bronze**: Dados brutos ingeridos e historizados.
